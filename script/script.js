@@ -10,7 +10,6 @@ var API = {
 }
 
 var APP = {
-	trackName: '',
 	tracks: [],
 	search: function(input, event) {
 		event.preventDefault();
@@ -32,10 +31,14 @@ var APP = {
 	onPlay: function(track) {
 		var start = track.lastIndexOf('(') + 1,
 			end = track.lastIndexOf(')'),
-			trackId = track.slice(start, end);
+			trackId = track.slice(start, end),
+			self = this;
 
 		$.get(API.trackURI(trackId), function(response) {
-			console.log(response);
+			var track = JSON.parse(response);
+
+			self.audio.attr('src', track.track_listen_url);
+			self.audio.fadeIn();
 		})
 	},
 	update: function() {
@@ -57,7 +60,13 @@ var APP = {
 		var form = $('<form></form>'),
 			input = $('<input type="text">'),
 			button = $('<button type="submit">SUBMIT</button>');
-			
+		
+		this.audio = $("<audio></audio>").attr({
+			'volume':0.4,
+			'autoplay':'autoplay',
+			'controls': true
+		});
+		this.audio.fadeOut(0);
 		this.traksHTML = $('<ul></ul>');
 
 		form.on('submit', this.search.bind(this, input));
@@ -66,6 +75,7 @@ var APP = {
 		form.append(button);
 
 		root.html(form);
+		root.append(this.audio);
 		root.append(this.traksHTML);
 	}
 }
